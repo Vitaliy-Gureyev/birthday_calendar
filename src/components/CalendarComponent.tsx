@@ -25,7 +25,8 @@ const CalendarComponent: FC<CalendarProps> = ({events, birthdays}) => {
                     </div>)}
                 {currentDayBirthday.map((e, index) =>
                     <div key={index}>
-                        🎂{e.description}
+                        🎂{e.birthdayPersonName}<br/>
+                        {e.description}
                     </div>
                 )}
             </div>

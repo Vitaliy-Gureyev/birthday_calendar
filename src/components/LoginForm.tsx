@@ -3,21 +3,26 @@ import {Button, Form, Input} from "antd";
 import {rules} from "../utils/rules";
 import {useTypeSelector} from "../hooks/useTypeSelector";
 import {useActions} from "../hooks/useActions";
+import {GoogleCircleFilled} from '@ant-design/icons';
+import {db} from "../firebase";
+import { collection } from 'firebase/firestore/lite';
 
 const LoginForm: FC = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const {error, isLoading} = useTypeSelector(state => state.authReducer)
-    const {loginWithEmail} = useActions()
+    const {loginWithEmail, loginWithGoogle} = useActions()
 
-    const submit = () => {
+    const submitLoginWithEmail = () => {
         loginWithEmail(email, password)
+    }
+    const handleLoginWithGoogle = () => {
+        loginWithGoogle()
     }
 
     return (
-        <>
         <Form
-            onFinish={submit}
+            onFinish={submitLoginWithEmail}
         >
             {error && <div style={{color: 'red'}}>{error}</div>}
             <Form.Item
@@ -41,13 +46,21 @@ const LoginForm: FC = () => {
                 />
             </Form.Item>
             <Form.Item>
-                <Button type="primary" htmlType="submit" loading={isLoading}>
+                <Button type="primary"
+                        htmlType="submit"
+                        loading={isLoading}
+                >
                     Login
                 </Button>
-                <Button></Button>
+            </Form.Item>
+            <Form.Item>
+                <Button onClick={handleLoginWithGoogle}
+                        loading={isLoading}>
+                    Login with Google
+                    <GoogleCircleFilled/>
+                </Button>
             </Form.Item>
         </Form>
-        </>
     );
 };
 

@@ -1,8 +1,9 @@
 import {AuthActionsEnum, SetAuthAction, SetErrorAction, SetIsLoadingAction, SetUserAction} from "./types";
 import {IUser} from "../../../models/IUser";
 import {AppDispatch} from "../../index";
-import {auth, provider} from "../../../firebase";
+import {auth, db, provider} from "../../../firebase";
 import {signInWithEmailAndPassword, signOut, signInWithPopup} from "firebase/auth";
+import {addDoc, collection, doc, setDoc } from "firebase/firestore/lite";
 
 export const AuthActionCreator = {
     setUser: (user: IUser): SetUserAction => ({type: AuthActionsEnum.SET_USER, payload: user}),
@@ -28,45 +29,43 @@ export const AuthActionCreator = {
             })
             .catch((error) => {
                 const errorCode = error.code;
-                const errorMessage = error.message;
                 dispatch(AuthActionCreator.setError(errorCode))
             });
         dispatch(AuthActionCreator.setIsLoading(false))
-        
-        /*try {
-            dispatch(AuthActionCreator.setIsLoading(true))
-            setTimeout(async () => {
-                const response = await api.getUsers()
-                const mockedUser = response.data.find(user => user.username === username && user.password === password)
-                if (mockedUser) {
-                    localStorage.setItem('auth', 'true')
-                    localStorage.setItem('username', mockedUser.username)
-                    dispatch(AuthActionCreator.setIsAuth(true))
-                    dispatch(AuthActionCreator.setUser(mockedUser))
-                } else {
-                    dispatch(AuthActionCreator.setError('wrong username or password'))
-                }
-                dispatch(AuthActionCreator.setIsLoading(false))
-            }, 1000)
-        } catch (e) {
-            dispatch(AuthActionCreator.setError('some error'))
-        }*/
     },
 
-    loginWithFacebook: () => async (dispatch:AppDispatch) => {
+    loginWithGoogle: () => async (dispatch: AppDispatch) => {
+        dispatch(AuthActionCreator.setIsLoading(true))
         await signInWithPopup(auth, provider)
-            .then(data=>{
-                console.log(data)
+            .then(userCredential => {
+                const user = userCredential.user;
+                const name = user.displayName === null ? '' : user.displayName
+                const email = user.email === null ? '' : user.email
+                dispatch(AuthActionCreator.setIsAuth(true))
+                dispatch(AuthActionCreator.setUser({
+                    username: name,
+                    id: user.uid,
+                    email: email,
+                }))
+
             })
+            .then(() => {
+                localStorage.setItem('auth', 'true')
+                dispatch(AuthActionCreator.setIsLoading(false))
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                dispatch(AuthActionCreator.setError(errorCode))
+            });
     },
 
     logout: () => async (dispatch: AppDispatch) => {
         signOut(auth).then(() => {
             dispatch(AuthActionCreator.setUser({} as IUser))
             dispatch(AuthActionCreator.setIsAuth(false))
+            localStorage.removeItem('auth')
         }).catch((error) => {
             alert(error)
         });
-
     },
 }

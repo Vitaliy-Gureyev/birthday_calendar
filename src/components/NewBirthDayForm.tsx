@@ -14,7 +14,7 @@ const NewBirthdayForm: FC<BirthdayFormProps> = ({submit}) => {
     const {user} = useTypeSelector(state => state.authReducer)
 
     const [birthday, setBirthday] = useState<IBirthday>({
-        author: '',
+        authorId: '',
         birthdayPersonName: '',
         date: '',
         description: '',
@@ -22,12 +22,12 @@ const NewBirthdayForm: FC<BirthdayFormProps> = ({submit}) => {
 
     const selectDate = (date: Moment | null) => {
         if (date) {
-            setBirthday({...birthday, date: formatDate(date.toDate())} )
+            setBirthday({...birthday, date: formatDate(date.toDate())})
         }
     }
 
     const submitForm = () => {
-        submit({...birthday, author:user.username})
+        submit({...birthday, authorId: user.id})
     }
 
     return (

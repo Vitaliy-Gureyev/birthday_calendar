@@ -1,5 +1,5 @@
 export interface IBirthday {
-    author: string,
+    authorId: string,
     birthdayPersonName: string,
     date: string,
     description: string
